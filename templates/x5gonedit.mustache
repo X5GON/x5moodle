@@ -1,0 +1,142 @@
+{{!
+
+    // This file is part of X5Moodle (X5GON Activity plugin for Moodle)
+
+    // Moodle is free software: you can redistribute it and/or modify
+    // it under the terms of the GNU General Public License as published by
+    // the Free Software Foundation, either version 3 of the License, or
+    // (at your option) any later version.
+    //
+    // Moodle is distributed in the hope that it will be useful,
+    // but WITHOUT ANY WARRANTY; without even the implied warranty of
+    // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    // GNU General Public License for more details.
+    //
+    // You should have received a copy of the GNU General Public License
+    // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+    /**
+
+      * X5GON Europeen project: AI based Recommendation System for Open Educative Resources
+      * @package    mod_xfgon
+      * @copyright  2018-2020 X5GON-Univ_Nantes_Team (https://chaireunescorel.ls2n.fr/, https://www.univ-nantes.fr/)
+      * @license    BSD-2-Clause (https://opensource.org/licenses/BSD-2-Clause)
+
+    */
+
+}}
+{{!
+    @template local_x5gonapi/guniversal
+
+    Template for adding the Google Universal Tracking script.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * siteid The Google tracking code
+    * addition Page tracking info added by this plugin
+
+    Example context (json):
+    { "siteid": UA-90210-15, "addition": 2, }
+
+    //Example: X5gon full url:
+    local_x5gonapi_x5gon/x5gon-log
+}}
+
+
+{{#js}}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************Course needed data************************************************************************/
+/* function crs_nd_data(){
+    var crs_nd_da = {};
+    try {
+        crs_nd_da.course_gen_infos = JSON.parse( decodeHtml('{{course_gen_infos}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_gen_infos = JSON.parse(decodeHtml('{{course_gen_infos}}').replace(/\'/g, "\\'"));
+    };
+    try {
+        crs_nd_da.course_cat_infos = JSON.parse( decodeHtml('{{course_cat_infos}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_cat_infos = JSON.parse(decodeHtml('{{course_cat_infos}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.course_modules =   JSON.parse( decodeHtml('{{course_modules}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_modules =   JSON.parse(decodeHtml('{{course_modules}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.provider_token =   JSON.parse( decodeHtml('{{provider_token}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.provider_token =   JSON.parse(decodeHtml('{{provider_token}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.user_consent =  JSON.parse( decodeHtml('{{user_consent}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.user_consent =  JSON.parse(decodeHtml('{{user_consent}}').replace(/\'/g, "\\'"));
+
+    };
+
+    return crs_nd_da;
+}
+// Course needed data
+var crs_nd_da = crs_nd_data();
+var course_gen_infos  = crs_nd_da.course_gen_infos;
+var course_cat_infos  = crs_nd_da.course_cat_infos;
+var course_modules    = crs_nd_da.course_modules;
+var provider_token    = crs_nd_da.provider_token;
+var user_consent      = crs_nd_da.user_consent;
+
+*/
+
+
+
+/****************************************************************/
+
+require(['jquery'], function($) {
+
+       // Content items handlers
+       $('.gx5lnplst').toggleClass("disabledx5plstedit", !$('input[name=enablex5playlist]').is(':checked'));
+       $('body').on('click', '[name=enablex5playlist]', function() {
+            // $(".gx5lnplst *").children().prop('disabled', !$('input[name=enablex5playlist]').is(':checked'));
+            $('.gx5lnplst').toggleClass("disabledx5plstedit", !$('input[name=enablex5playlist]').is(':checked'));
+
+       });
+
+       // Items click handlers
+       $('body').on('click', '.plstedtgen, .plstedtim', function() {
+            window.open($(this).find("a").attr( "href" ), '_blank');
+       });
+
+       // Plst5lnFetchmd handlers
+       if( $('input[name=pst5lnftch]:checked').val() == "pst5lnftchfmmbz"){
+         $('.gx5lnplsturlctcr').toggleClass("disabledx5plstedit", true);
+       }else{
+         $('.gx5lnplstmbzctcr').toggleClass("disabledx5plstedit", true);
+       }
+       $('body').on('change', '[name=pst5lnftch]', function() {
+            if( $('input[name=pst5lnftch]:checked').val() == "pst5lnftchfmmbz"){
+              $('.gx5lnplsturlctcr').toggleClass("disabledx5plstedit", true);
+              $('.gx5lnplstmbzctcr').toggleClass("disabledx5plstedit", false);
+            }else{
+              $('.gx5lnplstmbzctcr').toggleClass("disabledx5plstedit", true);
+              $('.gx5lnplsturlctcr').toggleClass("disabledx5plstedit", false);
+            }
+       });
+});
+
+{{/js}}

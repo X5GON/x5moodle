@@ -1,0 +1,501 @@
+/*
+
+// This file is part of X5Moodle (X5GON Activity plugin for Moodle)
+
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+
+  * X5GON Europeen project: AI based Recommendation System for Open Educative Resources
+  * @package    mod_xfgon
+  * @copyright  2018-2020 X5GON-Univ_Nantes_Team (https://chaireunescorel.ls2n.fr/, https://www.univ-nantes.fr/)
+  * @license    BSD-2-Clause (https://opensource.org/licenses/BSD-2-Clause)
+
+*/
+
+@import url("../../../../mod/xfgon/style/fontawesome/all.min.css");
+
+/* X5 general*/
+.x5plgncer {
+
+  min-height: 500px;
+}
+
+.x5loadingicon {
+    color: #20939f;
+    margin-left: 45%;
+    z-index: 999;
+    position: fixed;
+    top: 70%;
+
+}
+
+/* all X5 feautures*/
+.plstim, .recim, .discim, .discprqriesim {
+    border-radius: 6px;
+    width: 90%;
+    display: inline-block;
+    padding: 5px 20px;
+}
+
+.plstim:hover, .recim:hover, .discim:hover{
+    background-color: #cce3ea;
+    cursor: pointer;
+}
+
+.x5itemicon {
+    float: right;
+}
+
+.x5itemtle {
+    text-overflow: ellipsis;
+    max-width: 75%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.plstimurl, .recimurl, .recimlge, .recimpr, .discimurl, .discimlge, .discimpr, .plstimar, .plstimpr, .x5itemkwds, .x5itemcpts {
+    color: gray;
+}
+
+.x5ctrcs {
+    min-height: 500px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.x5itemkwds, .x5itemcpts {
+    float: right;
+    font-size: 10px;
+    bottom: -5px;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 35%;
+    text-align: left;
+    direction: rtl;
+}
+
+.x5kwdsicon > img, .x5cptsicon > img {
+      height: 13px;
+      width: 13px;
+      margin-left: 2px;
+}
+
+.x5itemactinfos {
+    float: right;
+    margin-right: 2%;
+    width: 12%;
+    max-width: 20%;
+    margin-top: -2px;
+}
+
+.x5itemactinfo {
+    margin-right: 5%;
+}
+
+.x5itemactinfoelm{
+    margin-right: 2%;
+}
+
+.x5vwsicon > img, .x5lksicon > img, .x5dlksicon > img{
+      height: 16px;
+      width: 16px;
+      margin-left: 2px;
+}
+.x5vwscont, .x5lksicont, .x5dlksicont {
+      position: absolute;
+      font-size: 9px;
+      text-overflow: ellipsis;
+      max-width: 30%;
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+}
+
+.x5cptsshm, .x5kwdsshm {
+      font-size: 10px;
+}
+
+.x5cptsshmcr, .x5kwdsshmcr {
+      float: right;
+      position: relative;
+      bottom: -5px;
+      margin-right: 2px;
+}
+
+.x5cptsshmcr:hover, .x5kwdsshmcr:hover {
+      text-decoration: underline;
+      color: blue;
+}
+
+
+
+
+/* X5 Discovery */
+.discimkwds, .discimcpts {
+    max-width: 20%;
+}
+
+.discsearchcs {
+    padding: 3% 15%;
+}
+
+.schinptcs {
+    padding: 10px;
+    font-size: 17px;
+    border: 1px solid gray;
+    float: left;
+    width: 70%;
+    background: #f1f1f1;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+}
+
+.schbtncs {
+    width: 15%;
+    height: 47px;
+    padding: 10px;
+    background: #2196F3;
+    color: white;
+    font-size: 17px;
+    border: 1px solid grey;
+    border-left: none;
+    cursor: pointer;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.schbtncs:hover {
+    background: #0b7dda;
+}
+
+.x5discctrcs {
+    position: relative;
+}
+
+.disccrcs {
+    width: 80%;
+}
+
+.discprqriescs {
+    float: right;
+    width: 20%;
+    height: 500px;
+    margin-top: 3%;
+    position: absolute;
+    top: 0%;
+    right: 0%;
+}
+
+.discprqrieslabcs {
+    margin-left: 5%;
+    white-space: nowrap;
+}
+
+.discprqriesim{
+    height: 37px;
+    white-space: nowrap;
+}
+
+.discprqriesim:hover {
+    background-color: #e5f0f9;
+    cursor: pointer;
+}
+
+.pdlabicncs {
+    margin-left: 15%;
+    color: #2196f3;
+    cursor: pointer;
+    padding-inline: 6%;
+    padding-block: 1%;
+    border-radius: 10%;
+}
+
+.pdlabicncs:hover {
+    background: #d5e1e1;
+}
+
+.prqriesimicon{
+    float: left;
+    margin: 1%;
+    margin-right: 3%;
+    color: #20939f;
+}
+
+.prqriesimcont{
+    text-overflow: ellipsis;
+    max-width: 85%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.discprqriescontcs {
+    margin-top: 3%;
+    margin-left: -3%;
+}
+
+.discim {
+    padding: 5px 45px;
+    width: 95%;
+}
+
+.discimactinfo {
+    float: right;
+    margin-right: 2%;
+}
+
+.discimvws {
+    position: absolute;
+    left: 1%;
+    width: 6%;
+    margin-right: unset;
+    margin-top: 3px;
+}
+
+
+/* X5Recommend*/
+
+.recim {
+    padding: 5px 55px;
+}
+
+.recimactinfo {
+    float: right;
+    margin-right: 2%;
+}
+
+.recimvws {
+    position: absolute;
+    left: 9%;
+    width: 6%;
+    margin-right: unset;
+    margin-top: 3px;
+}
+
+
+
+/* X5Playlist*/
+.plstim{
+    padding: 5px 55px;
+}
+
+.x5itemovw {
+    margin-right: 5%;
+    float: left;
+}
+.x5itemovw > img {
+    width: 130px;
+    height: 65px;
+    border-radius: 4px;
+    margin-top: 1%;
+    border-style: solid;
+    border-color: #ced4da;
+    border-width: 1px;
+}
+
+.plstimkwds, .plstimcpts {
+      bottom: -5px;
+      position: relative;
+}
+
+.plstimactinfo {
+    float: right;
+    margin-right: 2%;
+}
+
+.plstimvws {
+    position: absolute;
+    left: 9%;
+    width: 6%;
+    margin-right: unset;
+    margin-top: 3px;
+}
+
+
+/* X5gon edit form*/
+.gx5lnplstnw {
+      position: absolute;
+      left: -33%;
+      top: 7%;
+}
+
+.x5lnplstnew {
+      height: 17%;
+      padding: 1%;
+      width: 17%;
+      border-radius: 2%;
+}
+
+.disabledx5plstedit {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.gx5lnplstmbz, .gx5lnplsturl{
+    width: 60%;
+    margin-bottom: 1%;
+    padding-left: 12px;
+}
+
+.gx5lnplstmbzct, .gx5lnplsturlct{
+    width: 20rem;
+    float: left;
+    margin-right: 2%;
+}
+
+.gx5lnplstels {
+      width: 40%;
+      border-width: 1px;
+      border-color: #ced4da;
+      border-style: solid;
+      margin-top: -6%;
+      border-radius: 8px;
+      border-width: 1px;
+      border-color: #ced4da;
+      border-style: solid;
+}
+.plstedtims {
+      margin-left: 2%;
+      margin-bottom: 3%;
+      min-height: 230px;
+      max-height: 250px;
+      overflow-y: scroll;
+}
+.plstedtimtle {
+      font-size: 10px;
+}
+.plstedtimpr, .plstedtimar{
+      font-size: 9px;
+}
+
+.plstedtimicon {
+      font-size: 12px;
+}
+
+.plstedtim {
+      width: 98%;
+}
+
+.plstedtgen {
+      color: #1177d1;
+      margin-top: 2%;
+      margin-bottom: 2%;
+      cursor: pointer;
+      text-align: center;
+}
+
+#id_pst5lnftchfmurl, #id_pst5lnftchfmmbz {
+      width: 93px;
+}
+
+.gx5lnplstmbzclcr, .gx5lnplsturlclcr {
+      width: 0%;
+      margin-bottom: -5%;
+}
+
+.gx5lnplstmbzctcr, .gx5lnplsturlctcr {
+      margin-left: 5%;
+}
+
+
+
+/********************Mobile set**************************/
+@media screen and (max-device-width: 1100px) {
+    /* MOBILE.CSS CODE HERE */
+    /* Below this screen size it's considred as mobile screen: still need to test on various set of devices*/
+
+    .recimvws,  .plstimvws{
+        left: 9%;
+    }
+    .x5itemkwds, .x5itemcpts {
+        float: right;
+        font-size: 10px;
+        bottom: -5px;
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 18%;
+        text-align: left;
+        direction: rtl;
+    }
+
+    .discimkwds, .discimcpts {
+        max-width: 12%;
+    }
+
+    /* Edit form*/
+    #fgroup_id_pst5lngp > div:first-child {
+        flex: 0 0 20%;
+    }
+
+    #fgroup_id_pst5lngp > div:nth-child(2) {
+        flex: 0 0 80%;
+        max-width: 80%;
+    }
+
+    #id_pst5lnurl {
+          max-width: 75%;
+    }
+    .gx5lnplstmbzct, .gx5lnplsturlct {
+        width: 15rem;
+    }
+    .gx5lnplstnw {
+        left : -24%;
+    }
+
+}
+
+@media screen and (max-device-width: 640px) {
+    /* MOBILE.CSS CODE HERE */
+    /* Below this screen size it's considred as mobile screen: still need to test on various set of devices*/
+
+    .recimvws,  .plstimvws{
+        left: 8%;
+    }
+
+    .x5itemkwds, .x5itemcpts {
+        float: right;
+        font-size: 10px;
+        bottom: -5px;
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 10%;
+        text-align: left;
+        direction: rtl;
+    }
+
+
+    /* Edit form*/
+    #id_pst5lnurl {
+          max-width: 50%;
+    }
+    .gx5lnplstmbzct, .gx5lnplsturlct {
+        width: 10rem;
+    }
+    #id_pst5lnftchfmurl, #id_pst5lnftchfmmbz {
+          width: 40%;
+    }
+
+    .gx5lnplstnw {
+        left : -22%;
+    }
+    #id_pst5lnftchnew {
+      font-size: 12px;
+    }
+}

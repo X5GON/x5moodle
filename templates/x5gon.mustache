@@ -1,0 +1,1495 @@
+{{!
+
+      // This file is part of X5Moodle (X5GON Activity plugin for Moodle)
+
+      // Moodle is free software: you can redistribute it and/or modify
+      // it under the terms of the GNU General Public License as published by
+      // the Free Software Foundation, either version 3 of the License, or
+      // (at your option) any later version.
+      //
+      // Moodle is distributed in the hope that it will be useful,
+      // but WITHOUT ANY WARRANTY; without even the implied warranty of
+      // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      // GNU General Public License for more details.
+      //
+      // You should have received a copy of the GNU General Public License
+      // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+      /**
+
+        * X5GON Europeen project: AI based Recommendation System for Open Educative Resources
+        * @package    mod_xfgon
+        * @copyright  2018-2020 X5GON-Univ_Nantes_Team (https://chaireunescorel.ls2n.fr/, https://www.univ-nantes.fr/)
+        * @license    BSD-2-Clause (https://opensource.org/licenses/BSD-2-Clause)
+
+      */
+}}
+{{!
+    @template local_x5gonapi/guniversal
+
+    Template for adding the Google Universal Tracking script.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * siteid The Google tracking code
+    * addition Page tracking info added by this plugin
+
+    Example context (json):
+    { "siteid": UA-90210-15, "addition": 2, }
+
+    //Example: X5gon full url:
+    local_x5gonapi_x5gon/x5gon-log
+}}
+
+
+{{#js}}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************Course needed data************************************************************************/
+function crs_nd_data(){
+    var crs_nd_da = {};
+    try {
+        crs_nd_da.course_gen_infos = JSON.parse( decodeHtml('{{course_gen_infos}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_gen_infos = JSON.parse(decodeHtml('{{course_gen_infos}}').replace(/\'/g, "\\'"));
+    };
+    try {
+        crs_nd_da.course_cat_infos = JSON.parse( decodeHtml('{{course_cat_infos}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_cat_infos = JSON.parse(decodeHtml('{{course_cat_infos}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.course_modules =   JSON.parse( decodeHtml('{{course_modules}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.course_modules =   JSON.parse(decodeHtml('{{course_modules}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.provider_token =   JSON.parse( decodeHtml('{{provider_token}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.provider_token =   JSON.parse(decodeHtml('{{provider_token}}').replace(/\'/g, "\\'"));
+
+    };
+    try {
+        crs_nd_da.user_consent =  JSON.parse( decodeHtml('{{user_consent}}') );
+    } catch(err) {
+        // console.log(err);
+        crs_nd_da.user_consent =  JSON.parse(decodeHtml('{{user_consent}}').replace(/\'/g, "\\'"));
+
+    };
+
+    return crs_nd_da;
+}
+// Course needed data
+var crs_nd_da = crs_nd_data();
+var course_gen_infos  = crs_nd_da.course_gen_infos;
+var course_cat_infos  = crs_nd_da.course_cat_infos;
+var course_modules    = crs_nd_da.course_modules;
+var provider_token    = crs_nd_da.provider_token;
+var user_consent      = crs_nd_da.user_consent;
+var mdl_root_url      = (course_gen_infos.crsurl).split('course')[0];
+
+var x5disc_lst        = window.x5disc_lst;
+if(x5disc_lst !== undefined){activity2log("disc", "disccompute", {"lastlst": x5disc_lst});}
+var x5trnd_lst        = window.x5trnd_lst;
+if (x5trnd_lst !== undefined){activity2log("disc", "trndcompute", {"lastlst": x5trnd_lst});}
+var x5rec_lst         = window.x5rec_lst;
+if(x5rec_lst !== undefined){activity2log("rec", "reccompute", {"lastlst": x5rec_lst});}
+var x5plst_lst        = window.x5plst_lst;
+// activity2log("plst", "plstcompute", {"lastlst": x5plst_lst});
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************x5gonActivity plugin Moodle***********************************************************************/
+function get_res_awesomeicon(mime_type) {
+    // List of official MIME Types: http://www.iana.org/assignments/media-types/media-types.xhtml
+    var icon_classes = {
+        // Media
+        'application/image': 'fa-file-image-o',
+        'application/audio': 'fa-file-audio-o',
+        'application/video': 'fa-file-video-o',
+        'video/mp4': 'fa-file-video-o',
+        // Documents
+        'application/pdf': 'fa-file-pdf-o',
+        'application/msword': 'fa-file-word-o',
+        'application/vnd.ms-word': 'fa-file-word-o',
+        'application/vnd.oasis.opendocument.text': 'fa-file-word-o',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml': 'fa-file-word-o',
+        'application/vnd.ms-excel': 'fa-file-excel-o',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml': 'fa-file-excel-o',
+        'application/vnd.oasis.opendocument.spreadsheet': 'fa-file-excel-o',
+        'application/vnd.ms-powerpoint': 'fa-file-powerpoint-o',
+        'application/vnd.openxmlformats-officedocument.presentationml': 'fa-file-powerpoint-o',
+        'application/vnd.oasis.opendocument.presentation': 'fa-file-powerpoint-o',
+        'application/plain': 'fa-file-text-o',
+        'application/html': 'fa-file-code-o',
+        'application/json': 'fa-file-code-o',
+        'text/plain': 'fa-file-text-o',
+        'text/html': 'fa-file-code-o',
+        'text/json': 'fa-file-code-o',
+        // Archives
+        'application/gzip': 'fa-file-archive-o',
+        'application/zip': 'fa-file-archive-o',
+        // Code
+        'application/code': 'fa fa-file-code-o'
+    };
+    for ( var key in icon_classes ) {
+      if (key.includes(mime_type) !== false) {
+        return icon_classes[key];
+      }
+    }
+    return 'fa-file-o';
+}
+
+function x5disc_loading(action){
+
+    searchingcs = 'fa fa-search';
+    if(action=="loading"){
+        // searchingcs = 'fa fa-circle-notch fa-spin';
+        searchingcs = 'fa fa-cog fa-spin';
+    }
+    $("#schbtn > i").removeClass().addClass(searchingcs);
+}
+
+function x5discresulthandler(searchq){
+
+    if(searchq != ""){
+        x5disc_loading("loading");
+        searchq = searchq.trim()
+        try {
+              $.ajax({
+                  url: "https://wp3.x5gon.org/others/modelsdsh/search",
+                  type: "POST",
+                  data: JSON.stringify({
+                          "q": searchq,
+                          "max_resources": 10,
+                          "max_concepts": 5
+                  }),
+                  contentType: "application/json; charset=utf-8",
+                  crossDomain: true,
+                  success: function (result) {
+                      if (result.isOk == false) console.log(result.message);
+                      var discresults = result['result'];
+                      x5disc_lst = discresults;
+                      activity2log("disc", "disccompute", {"lastlst": x5disc_lst});
+                      updatediscrlts(discresults);
+
+                  },
+                  async: false
+              });
+        } catch(err) { };
+
+        x5disc_loading("loaded");
+
+        // Send fre access
+        freaccess = {
+            fre: 'x5discovery',
+            acttype: 'search',
+            actdata: {
+              x5dq: searchq
+            },
+            timestamp: parseInt(Date.now()/1000)
+        };
+        x5activityplgn_predata(freaccess);
+
+        // Update the pdqries trends
+        setTimeout(x5discpdqshandler(), 3000);
+
+      }
+}
+
+function x5discpdqs_loading(action){
+
+    searchingcs = 'fa fa-redo';
+    if(action=="loading"){
+        // searchingcs = 'fa fa-circle-notch fa-spin';
+        searchingcs = 'fa fa-sync fa-spin';
+    }
+    $("#pdlabicn > i").removeClass().addClass(searchingcs);
+}
+
+function x5discpdqshandler(){
+
+    var resId= getUrlParamVal('id');
+
+    x5discpdqs_loading("loading");
+    try {
+          $.ajax({
+              url: "https://wp3.x5gon.org/others/moodle/x5plgn/frepte",
+              type: "POST",
+              data: JSON.stringify({
+                      "fre": "x5discovery",
+                      "max_pdres": 10,
+                      "grpgcrta": {
+                        "name": "crsuri",
+                        "value": course_gen_infos['crsurl'],
+                      },
+                      "grpgcrta_data": {
+                        "crstitle": course_gen_infos.title,
+                        "crssummary": course_gen_infos.summary,
+                        "modtitle": course_modules[resId].course_module_instance.name,
+                        "modsummary": course_modules[resId].course_module_instance.intro,
+                        "customhint": ""
+                      }
+              }),
+              contentType: "application/json; charset=utf-8",
+              crossDomain: true,
+              success: function (result) {
+                  if (result.isOk == false) console.log(result.message);
+                  var pdqsresults = result['pddata'];
+                  x5trnd_lst = pdqsresults;
+                  activity2log("disc", "trndcompute", {"lastlst": x5trnd_lst});
+                  updateproposedqueriesrlts(pdqsresults);
+
+              },
+              async: false
+          });
+    } catch(err) { };
+
+    x5discpdqs_loading("loaded");
+
+}
+
+function oersacsdata(oers){
+
+    var resId= getUrlParamVal('id');
+    x5discpdqs_loading("loading");
+    var oeracs = [];
+    try {
+          $.ajax({
+              url: "https://wp3.x5gon.org/others/moodle/x5plgn/oeracs",
+              type: "POST",
+              data: JSON.stringify({
+                      "fre": "x5discovery",
+                      "max_pdres": 10,
+                      "grpgcrta": {
+                        "name": "crsuri",
+                        "value": course_gen_infos['crsurl'],
+                      },
+                      "grpgcrta_data": {
+                        "crstitle": course_gen_infos.title,
+                        "crssummary": course_gen_infos.summary,
+                        "modtitle": course_modules[resId].course_module_instance.name,
+                        "modsummary": course_modules[resId].course_module_instance.intro,
+                        "customhint": ""
+                      },
+                      "oers": oers
+              }),
+              contentType: "application/json; charset=utf-8",
+              crossDomain: true,
+              success: function (result) {
+                  if (result.isOk == false) console.log(result.message);
+                  oeracs = result['pddata'];
+
+              },
+              async: false
+          });
+    } catch(err) { console.log(err) };
+
+    x5discpdqs_loading("loaded");
+    return oeracs;
+}
+
+function updateproposedqueriesrlts(pdqsresults){
+
+    var newcontent = "";
+    for(var i = 0; i < pdqsresults.length; i++) {
+            newcontent += '<span class="discprqriesim" data-prqrieix="'+ i +'" title="`'+ pdqsresults[i]['query'] + '` searched `'+ pdqsresults[i]['nbsearch'] +'` times">';
+            newcontent += '<span class="prqriesimicon"><i class="fa fa-hashtag"></i></span>';
+            // newcontent += '<span class="prqriesimcont" title="Search for this query...">';
+            newcontent += '<span class="prqriesimcont">';
+            newcontent += '<small class="prqriesimq">'+ pdqsresults[i]['query'] +'</small>';
+            newcontent += '</span>';
+            newcontent += '</span></br>';
+    }
+    $('#discprqriescont').empty().append(newcontent);
+
+}
+
+function updatediscrlts(discresults){
+    // Get eors accesses details
+    var discitemsacs = oersacsdata(discresults.map(x => {return x['id']}));
+
+    $('#discrslts').empty();
+    var newcontent = "";
+    newcontent += '<table>';
+    for(var i = 0; i < discresults.length; i++) {
+        item  = discresults[i];
+        itemacs  = discitemsacs[i];
+        if (item["url"] != '' && item["url"] != null){
+            newcontent += '<tr class="discim" data-oerid="'+ item['id'] +'">';
+            if( "thumbnail" in item && item["thumbnail"] != ''){
+                newcontent += '<td class="x5itemovw">';
+                newcontent += '<img src="'+ item["thumbnail"] +'">';
+                newcontent += '</td>';
+            }else {
+                newcontent += '<td class="x5itemovw">';
+                newcontent += '<img src="pix/icon1.svg">';
+                newcontent += '</td>';
+            }
+            newcontent += '<td class="x5itemactinfos discimactinfos">';
+            newcontent += '<span class="x5itemactinfo discimvws" title="viewed '+ itemacs['nbacess'] +' times"><i class="x5itemactinfoelm x5vwsicon" ><img src="pix/vws/vws.png"></i><small><i class="x5itemactinfoelm x5vwscont">'+ itemacs['nbacess'] +'</i></small></span>';
+            newcontent += '<span class="x5itemactinfo discimlks" title="liked 0 times" style="display:none;"><i class="x5itemactinfoelm x5lksicon"><img src="pix/lks/lks.png"></i><small><i class="x5itemactinfoelm x5vwscont"></i>0</small></span>';
+            newcontent += '<span class="x5itemactinfo discimdlks" title="disliked 0 times" style="display:none;"><i class="x5itemactinfoelm x5dlksicon"><img src="pix/dlks/dlks.png"><small></i><i class="x5itemactinfoelm x5vwscont">0</i></small></span>';
+            newcontent += '</td>';
+            newcontent += '<td class="x5itemcont">';
+            newcontent += '<table class="x5itemdtls" style="table-layout:fixed;width:100%;">';
+            newcontent += '<tr>';
+            newcontent += '<td>';
+            newcontent += '<span class="x5itemicon discimicon" title="'+ item['mimetype'] +'"><i class="fa '+ get_res_awesomeicon(item['mimetype']) +'"></i></span>';
+            newcontent += '<strong class="x5itemtle discimtle" title="'+ item['title'] +'">'+ item['title'] +'</strong></br>';
+            newcontent += '<small class="discimurl" style="display:none;"><a href="'+ item["url"] +'" target="_blank">'+ item["url"] +'</a></small>';
+            newcontent += '</td>';
+            newcontent += '</tr>';
+            newcontent += '<tr>';
+            newcontent += '<td>';
+            newcontent += '<small class="discimlge"><b>Language:</b>'+ item["orig_lang"] +'</small>';
+            newcontent += '<small class="x5itemkwdscr"><small class="x5itemkwds discimkwds" title="Keywords"><i class="x5kwdsicon"><img src="pix/kwds/kwds.png"></i><span class="x5kwdsct" title="'+ item["keywords"].map(x => {return x['label']}).join(", ") +'">'+ (item["keywords"].map(x => {return x['label']})).reverse().join(", ") +'</span></small><small class="x5kwdsshmcr"><span class="x5kwdsshm">see more...</span></small></small>';
+            newcontent += '</td>';
+            newcontent += '</tr>';
+            newcontent += '<tr>';
+            newcontent += '<td>';
+            newcontent += '<small class="discimpr"><b>Provider:</b>'+ item["provider"] +'</small>';
+            newcontent += '<small class="x5itemcptscr"><small class="x5itemcpts discimcpts" title="Concepts"><i class="x5cptsicon"><img src="pix/cpts/cpts.png"></i><span class="x5cptsct" title="'+ item["wikifier"].map(x => x['label']).join(", ") +'">' + (Object.entries(item["wikifier"]).map(([ix, x]) => "<a class='x5cptsctelm' title='"+x['label']+"' data-cptelmix='"+ix+"' target='_blank' href='"+x['url']+"'>"+x['label']+"</a>")).reverse().join(", ") +'</span></small><small class="x5cptsshmcr"><span class="x5cptsshm">see more...</span></small></small>';
+            newcontent += '</td>';
+            newcontent += '</tr>';
+            newcontent += '</table>';
+            newcontent += '</td>';
+            newcontent += '</tr>';
+        }
+    }
+    newcontent += '</table>';
+    $('#discrslts').append(newcontent);
+}
+
+
+function x5activityplgn_predata(freaccess){
+
+        var resUrl=document.location.href.match(/(^[^#]*)/)[0];
+        var resId= getUrlParamVal('id');
+        var reslicence="";
+        var reslicenceurl="";
+        var resauthor="";
+        var resmimetype="";
+        var subresaccessedid='';
+        var resmediaobject={
+            resmd:"no",
+            resmdduration:"",
+            resmdsrc:"",
+            resmdaction:"",
+            resmdactionrltime:""
+        };
+        if(course_modules[resId].course_module_file!=undefined){
+            reslicence=course_modules[resId].course_module_file_licence.fullname;
+            reslicenceurl=course_modules[resId].course_module_file_licence.source;
+            resauthor=course_modules[resId].course_module_file.author;
+            resmimetype=course_modules[resId].course_module_file.mimetype;
+        }
+        senddatatox5gon( resUrl,
+                        resId,
+                        resauthor,
+                        reslicence,
+                        resmimetype,
+                        subresaccessedid,
+                        course_modules,
+                        course_gen_infos,
+                        course_cat_infos,
+                        resmediaobject,
+                        provider_token,
+                        user_consent,
+                        reslicenceurl,
+                        freaccess
+                    );
+}
+
+function x5activityplgn_accessrequest (providerToken, mdlResource) {
+
+      try {
+            var dataObjectTox5gon= addextramoodlemetadata(x5gonGetRequestString(true, providerToken, false, mdlResource, devrt=true), mdlResource);
+
+            var urlParams = new URLSearchParams((new URL(dataObjectTox5gon)).search);
+            var postdtaobj = {};
+            urlParams.forEach(function(value, key) {
+                postdtaobj[key] = value;
+            });
+
+            $.ajax({
+                url: "https://wp3.x5gon.org/others/moodle/x5plgn/freacs",
+                type: "POST",
+                data: JSON.stringify(postdtaobj),
+                contentType: "application/json; charset=utf-8",
+                crossDomain: true,
+                success: function (result) {
+                    if (result.isOk == false) console.log(result.message);
+                },
+                async: false
+            });
+      } catch(err) { console.log(err);};
+}
+
+
+function activity2log(x5cpt, activity, activitydata){
+      var actiondata = {};
+      switch (activity) {
+        case 'resaccess':
+              if (x5cpt == 'rec'){
+                    var acdresix = x5rec_lst.findIndex(x => x.id === activitydata['resid']);
+                    actiondata = {"lastlst":x5rec_lst,
+                                  "resid":  x5rec_lst[acdresix].id,
+                                  "resix": acdresix};
+              }else if(x5cpt == 'disc'){
+                    var acdresix = x5disc_lst.findIndex(x => x.id === activitydata['resid']);
+                    actiondata = {"lastlst":x5disc_lst,
+                                  "resid":  x5disc_lst[acdresix].id,
+                                  "resix": acdresix};
+              }else if(x5cpt == 'plst'){
+                    var acdresix = x5plst_lst.findIndex(x => (x.x5gon_id === activitydata['resid'] || parseInt(x.x5gon_id) === activitydata['resid']));
+                    actiondata = {"lastlst":x5plst_lst,
+                                  "resid":  x5plst_lst[acdresix].x5gon_id,
+                                  "resix": acdresix};
+              }
+              break;
+          case 'trndaccess':
+              var acdresix = activitydata['resid'];
+              actiondata = {"lastlst":x5trnd_lst,
+                            "resid":  acdresix,
+                            "resix": acdresix};
+              break;
+          case 'disccompute':
+              actiondata = {"lastlst":activitydata['lastlst']};
+              break;
+          case 'trndcompute':
+              actiondata = {"lastlst":activitydata['lastlst']};
+              break;
+          case 'reccompute':
+              actiondata = {"lastlst":activitydata['lastlst']};
+              break;
+          case 'manualsearch':
+              actiondata = activitydata;
+              break;
+          case 'keywrdsaccess':
+              actiondata = activitydata;
+              break;
+          case 'cptsaccess':
+              actiondata = activitydata;
+              break;
+          case 'topicaccess':
+              actiondata = activitydata;
+              break;
+          default:
+            actiondata = activitydata;
+            console.log('No aduequate action type !');
+      }
+
+      trace2log(x5cpt, activity, actiondata);
+
+}
+
+
+function trace2log(x5cpt, activity, actiondata){
+
+      var resId= getUrlParamVal('id');
+      $.ajax({
+          url: "lib/extrqstlib.php",
+          type: "POST",
+          data: {"action":"activity2log",
+                "x5cpnt":x5cpt,
+                 "crsid": course_gen_infos.id,
+                 "crsuri": course_gen_infos.crsurl,
+                 "mdlid": course_modules[resId].course_module_geninfos.id,
+                 "mdluri": course_modules[resId].course_module_geninfos.modurl,
+                 "usrid": user_consent.userid,
+                 "act": activity,
+                 "actdata": actiondata},
+          dataType: 'json',
+          success: function (result) {
+              if (result.isOk == false) console.log(result.message);
+          },
+          async: true
+      });
+
+}
+
+/******************To be optimized*********************************************/
+
+
+
+require(['jquery'], function($) {
+
+       $(".x5loadingicon").hide();
+       // Items click handlers
+       $('body').on('click', '.plstim, .recim, .discim', function() {
+            window.open($(this).find("a").attr( "href" ), '_blank');
+            /// To moodle log
+            activity2log(($(this).attr('class')).split('im')[0],
+                         "resaccess",
+                         {"resid": $(this).data("oerid")}
+                        );
+
+            /// To X5: only group usage data
+            // Oers access inside X5recommend/X5Discovery/X5playlist
+            var origfre = 'x5recommend';
+            if ($(this).attr('class')=="discim"){
+                origfre = 'x5discovery';
+            }else if ($(this).attr('class')=="plstim"){
+                origfre = 'x5playlist';
+            }
+            // Send fre access
+            freaccess = {
+                fre: origfre,
+                acttype: 'access',
+                actdata: {
+                  x5oerid: $(this).data("oerid")
+                },
+                timestamp: parseInt(Date.now()/1000)
+            };
+            x5activityplgn_predata(freaccess);
+       });
+
+       $('body').on('click', '.discprqriesim', function() {
+            $('#schinpt').val($(this).find(".prqriesimcont").text());
+            x5discresulthandler($(this).find(".prqriesimcont").text());
+            activity2log("disc",
+                         "trndaccess",
+                         {"resid": $(this).data("prqrieix")}
+                        );
+       });
+
+       $('body').on('mouseenter mouseleave', '.discprqriesim', function(e) {
+            if(e.type === 'mouseenter'){
+              $(this).find(".prqriesimicon > i").removeClass().addClass("fa fa-hashtag fa-spin");
+            }else{
+              $(this).find(".prqriesimicon > i").removeClass().addClass("fa fa-hashtag");
+            }
+       });
+
+       // X5Discovery handlers
+       $('#schbtn').click(function() {
+            x5discresulthandler($('#schinpt').val());
+            activity2log("disc", "manualsearch", {"searchq": $('#schinpt').val(),
+                                                  "lastlst": x5disc_lst});
+       });
+       $("#schinpt").on('keyup', function (e) {
+            if (e.keyCode === 13) {
+                x5discresulthandler($('#schinpt').val());
+                activity2log("disc", "manualsearch", {"searchq": $('#schinpt').val(),
+                                                      "lastlst": x5disc_lst});
+            }
+       });
+       $('.pdlabicncs').click(function() {
+            x5discpdqshandler();
+       });
+
+       // Topics&Keywords handlers
+       $('body').on('click', ".x5kwdsshm, .x5cptsshm", function(event) {
+            event.stopPropagation();
+
+            var parelmshm = ($(this).closest('.x5itemkwdscr, .x5itemcptscr')).find(".x5itemkwds, .x5itemcpts").first();
+            var parelm = $(event.target).closest(".discim, .recim, .plstim");
+            var cpnt = parelm.attr('class').split('im')[0];
+            var cptact = 'keywrdsaccess';
+            var cptdict = 'keywords';
+            var cptdictky = 'keywords';
+            var cptkoc = ((parelmshm.attr('class')).split(' ')[0]).split('x5item')[1];
+            if( cptkoc == 'cpts'){
+                cptact = 'cptsaccess';
+                cptdict = 'wikifier';
+                cptdictky = 'topics';
+            }
+            var parelmid = parelm.data("oerid");
+            if(cpnt == 'plst'){
+                var parelmix = eval("x5"+cpnt+"_lst").findIndex(x => (x.x5gon_id === parelmid || parseInt(x.x5gon_id) === parelmid ));
+                var parelmdict = eval("x5"+cpnt+"_lst")[parelmix].concepts;
+            }else{
+                var parelmix = eval("x5"+cpnt+"_lst").findIndex(x => x.id === parelmid);
+                var parelmdict = eval("x5"+cpnt+"_lst")[parelmix][[cptdict]];
+            }
+
+            if($(this).text() == 'see more...'){
+              parelmshm.attr('style',  'max-width:'+parseInt(parelmshm.css("max-width"))*1.5+'%');
+              parelmshm.css('font-size', '9px');
+              $(this).empty().text("see less..");
+              $(this).attr('style',  'font-size: 9px');
+              activity2log(cpnt,
+                           cptact,
+                           {"resid": parelmid,
+                            [cptdictky]: parelmdict
+                          });
+            }else{
+              parelmshm.attr('style',  'max-width:'+parseInt(parelmshm.css("max-width"))/1.5+'%');
+              parelmshm.css('font-size', '10px');
+              $(this).empty().text("see more...");
+              $(this).attr('style',  'font-size: 10px');
+            }
+
+       });
+       $('body').on('click', '.x5cptsctelm', function(event) {
+            event.stopPropagation();
+            var parelm = $(event.target).closest(".discim, .recim, .plstim");
+            var cpnt = parelm.attr('class').split('im')[0];
+            var parelmid = parelm.data("oerid");
+            if(cpnt == 'plst'){
+                var parelmix = eval("x5"+cpnt+"_lst").findIndex(x => (x.x5gon_id === parelmid || parseInt(x.x5gon_id) === parelmid));
+                var parelmcpts = eval("x5"+cpnt+"_lst")[parelmix].concepts;
+            }else{
+                var parelmix = eval("x5"+cpnt+"_lst").findIndex(x => x.id === parelmid);
+                var parelmcpts = eval("x5"+cpnt+"_lst")[parelmix].wikifier;
+            }
+            var cptix = $(event.target).data("cptelmix");
+            activity2log(cpnt,
+                         "topicaccess",
+                         {"resid": parelmid,
+                          "topic": parelmcpts[cptix].label,
+                          "topicix": cptix,
+                          "topics": parelmcpts
+                         });
+       });
+
+});
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************x5gonActivityAcquisistion plugin Moodle***********************************************************/
+function x5activityacqrequest (providerToken, mdlResource) {
+
+      try {
+            var dataObjectTox5gon= addextramoodlemetadata(x5gonGetRequestString(true, providerToken, false, mdlResource), mdlResource);
+            $.ajax({
+                    url: dataObjectTox5gon,
+                    crossDomain: true,
+                    success: function (result) {
+                        if (result.isOk == false) console.log(result.message);
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                     },
+                    async: false
+            });
+      } catch(err) { };
+}
+
+function addextramoodlemetadata(a, mdlResource){
+
+      mdlResourceNorm = normalizeDataFieldsForDataObjectTox5gon(mdlResource);
+      var l=Object.keys(mdlResourceNorm).map(key => "\x26"+ key + "\x3d" + encodeURIComponent(mdlResourceNorm[key]));
+      a+=l.join('');
+      return a;
+}
+
+function normalizeDataFieldsForDataObjectTox5gon(mdlResource){
+
+    var mdlResourceNorm={};
+    mdlResourceNorm.providertype  = 'moodle';
+    mdlResourceNorm.title         = mdlResource.restitle;
+    mdlResourceNorm.description   = mdlResource.resintro;
+    mdlResourceNorm.author        = mdlResource.resauthor;
+    mdlResourceNorm.language      = mdlResource.crslang;
+    mdlResourceNorm.creation_date = mdlResource.resadded;
+    mdlResourceNorm.type          = mdlResource.restype;
+    mdlResourceNorm.mimetype      = mdlResource.resmimetype;
+    mdlResourceNorm.license       = mdlResource.reslicence;
+    mdlResourceNorm.licensename   = mdlResource.reslicencename;
+    mdlResourceNorm.resurl        = mdlResource.resurl;
+    mdlResourceNorm.resmdlid      = mdlResource.resmdlid;
+    mdlResourceNorm.residinhtml   = mdlResource.residincrspage;
+    mdlResourceNorm.resurlinpage  = mdlResource.resurlincrspage;
+    mdlResourceNorm.rescrstitle   = mdlResource.crs;
+    mdlResourceNorm.rescrsid      = mdlResource.crsid;
+    mdlResourceNorm.rescrsurl     = mdlResource.crsurl;
+    mdlResourceNorm.rescrssum     = mdlResource.crssum;
+    mdlResourceNorm.rescrslang    = mdlResource.crslang;
+    mdlResourceNorm.rescrsctg     = mdlResource.crsctg;
+    mdlResourceNorm.rescrsctgdesc = mdlResource.crsctgdesc;
+    mdlResourceNorm.mdaccess      = mdlResource.resmd;
+    mdlResourceNorm.mdaction      = mdlResource.resmdaction;
+    mdlResourceNorm.mdsrc         = mdlResource.resmdsrc;
+    mdlResourceNorm.mdduration    = mdlResource.resmdduration;
+    mdlResourceNorm.mdactiontime  = mdlResource.resmdactionrltime;
+    mdlResourceNorm.freacs   = JSON.stringify(mdlResource.resfreacs);
+
+    return mdlResourceNorm;
+}
+
+function x5gonGetRequestString(validationFlag, providerToken, test, mdlResource, devrt=false) {
+
+      var Dat = new Date();
+      var Dt = Dat.toISOString().split('.')[0] + 'Z';
+      var CURL = document.URL;
+      var PURL = document.referrer;
+
+      //Different remote routes for log
+      var request = 'https://platform.x5gon.org/api/v1/connect/visit?x5gonValidated=';
+      if(mdlResource.resmd=="yes"){
+          request = 'https://platform.x5gon.org/api/v1/connect/video?x5gonValidated=';
+      }
+      if(devrt==true){
+          request = 'https://wp3.x5gon.org/others/moodle/x5plgn/freacs?x5gonValidated=';
+      }
+      request += encodeURIComponent(validationFlag);
+      request += '&dt=' + encodeURIComponent(Dt);
+      request += '&rq=' + encodeURIComponent(CURL);
+      request += '&rf=' + encodeURIComponent(PURL);
+      request += '&cid=' + encodeURIComponent(providerToken);
+      if (test) { request +='&test=' + test; }
+      return request;
+}
+
+
+/**************************************************************************************************************************/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+function decodeHtml(str)
+{
+    var map =
+    {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#039;': "'"
+
+    };
+    return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, function(m) {return map[m];});
+}
+function getUrlParamVal(str) {
+    var v = window.location.search.match(new RegExp('(?:[\?\&]'+str+'=)([^&]+)'));
+    return v ? v[1] : null;
+}
+
+/********************************************YOUTUBE player********************************************************************/
+
+   function onStateChange(event){
+
+       //We will focuse only on Play/Pause events for the moment
+       if( event.data==1 || event.data==2 ){
+
+             var dataToBesentTox5gon=decideAboutLocationPlayer(
+                                                                $("#"+event.target.getIframe().id).closest("div.mediaplugin"),
+                                                                course_modules,
+                                                                course_gen_infos,
+                                                                course_cat_infos,
+                                                                event
+                                                              );
+             if( dataToBesentTox5gon.resultstatus=="success" ){
+               senddatatox5gon(
+                                dataToBesentTox5gon.resUrl,
+                                dataToBesentTox5gon.resId,
+                                dataToBesentTox5gon.resauthor,
+                                dataToBesentTox5gon.reslicence,
+                                dataToBesentTox5gon.resmimetype,
+                                dataToBesentTox5gon.subresaccessedid,
+                                course_modules,
+                                course_gen_infos,
+                                course_cat_infos,
+                                dataToBesentTox5gon.resmediaobject,
+                                provider_token,
+                                user_consent,
+                                dataToBesentTox5gon.reslicenceurl
+                              );
+             }
+       }
+   }
+
+/********************************************YOUTUBE Player***********************************************************/
+
+/*******************************************Decision function for players*********************************************/
+function youtubeEventName(eventCode){
+     var evtname=eventCode;
+     if(eventCode==0){
+         evtname="Stop";
+     }else if(eventCode==1){
+         evtname="Play";
+     }else if(eventCode==2){
+         evtname="Pause";
+     }
+     return evtname;
+}
+
+function decideAboutLocationPlayer( mediapluginDivElement,course_modules,course_gen_infos,course_cat_infos, playerEvent ){
+
+         ////"mediapluginDivElement" : is the "mediaplugin" element containing the player
+          var resultstatus='faillure';
+          var resUrl='';
+          var resId='';
+          var subresaccessedid='';
+          var reslicence="";
+          var reslicenceurl="";
+          var resauthor="";
+          var resmimetype="";
+          var resmediaobject={
+              resmd:"yes",
+              resmdduration:playerEvent.target.getDuration(),
+              resmdsrc:playerEvent.target.getVideoUrl(),
+              resmdaction:youtubeEventName(playerEvent.target.getPlayerState()),
+              resmdactionrltime:playerEvent.target.getCurrentTime()
+          };
+          var clickaction=youtubeEventName(playerEvent.target.getPlayerState());
+
+          if( $(mediapluginDivElement).closest("li.activity")!=null && ($(mediapluginDivElement).closest("li.activity")).length!=0 ){
+                   ////In-coursepage-in-module
+                   resId= ($(mediapluginDivElement).closest("li.activity").attr('id')).split("-")[1];
+                   // resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                   resUrl=course_modules[resId].course_module_geninfos.modurl;
+                   subresaccessedid='#'+$(mediapluginDivElement).closest("li.activity").attr('id');
+                   if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                         //External media
+                   }else{
+                         //Internal media
+                         //...To be modified: moreinformations about the resourse
+                         resmediaobject={
+                             resmd:"yes",
+                             resmdduration:"",
+                             resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                             resmdaction:clickaction,
+                             resmdactionrltime:""
+                         };
+
+                   }
+
+
+
+          }else if( ($('body').attr('id')).match(/page-mod-.*-view/) ){
+                   ////In-modulepage
+                   resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                   resId= getUrlParamVal('id');
+                   subresaccessedid='';
+                   if( $('body').attr('id')=="page-mod-resource-view" ){
+                           //In-modulepage-resource
+                           if( ($(mediapluginDivElement).closest("div.resourcecontent")).length!=0 ){
+                                     //Main-content-ofmodule
+                                     subresaccessedid='#resourcecontent';
+                                     if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                                           //External media
+
+                                     }else{
+                                           //Internal media
+                                           resmediaobject={
+                                               resmd:"yes",
+                                               resmdduration:"",
+                                               resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                                               resmdaction:clickaction,
+                                               resmdactionrltime:""
+                                           };
+                                           //HERE dont do anything: the appropriate treatment will follow
+
+                                     }
+                           }else if( ($(mediapluginDivElement).closest("div#resourceintro")).length!=0 ){
+                                     //Extra-content-ofmmodule
+                                     subresaccessedid='#resourceintro';
+                                     if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                                           //External media
+
+
+                                     }else{
+                                           //Internal media
+                                           resmediaobject={
+                                               resmd:"yes",
+                                               resmdduration:"",
+                                               resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                                               resmdaction:clickaction,
+                                               resmdactionrltime:""
+                                           };
+                                           //...HERE dont do anything: the appropriate treatment will follow
+
+                                     }
+                           }
+
+                   }else{
+                           //if(  ($('body').attr('id')).match(/page-mod-(?!resource\b)\b-view/) ){
+                           //In-modulepage-otherthanResource
+                           if( ($(mediapluginDivElement).closest("div.resourcecontent")).length!=0 ){
+                                 //Main-content-ofmodule
+                                 subresaccessedid='#resourcecontent';
+                                 if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                                       //External media
+
+                                 }else{
+                                       //Internal media
+                                       resmediaobject={
+                                           resmd:"yes",
+                                           resmdduration:"",
+                                           resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                                           resmdaction:clickaction,
+                                           resmdactionrltime:""
+                                       };
+                                 }
+                           }else if( ($(mediapluginDivElement).closest("div#resourceintro")).length!=0 ){
+                                 //Extra-content-ofmmodule
+                                 subresaccessedid='#resourceintro';
+                                 if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                                       //External media
+
+                                 }else{
+                                       //Internal media
+                                       resmediaobject={
+                                           resmd:"yes",
+                                           resmdduration:"",
+                                           resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                                           resmdaction:clickaction,
+                                           resmdactionrltime:""
+                                       };
+
+                                 }
+                           }else{
+                                  //Another-ofmodule-structure
+                                  if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                                        //External media
+
+                                  }else{
+                                        //Internal media
+                                        resmediaobject={
+                                            resmd:"yes",
+                                            resmdduration:"",
+                                            resmdsrc:($(mediapluginDivElement).find("source").attr('src')),
+                                            resmdaction:clickaction,
+                                            resmdactionrltime:""
+                                        };
+
+                                  }
+                           }
+
+                   }
+
+          }
+          else{
+               //In-coursepage-out-module
+               //...HERE dont do anything: informations about the resourse still in research
+               if( ($(mediapluginDivElement).find("iframe.vjs-tech")).length!=0 ){
+                     //External media
+               }else{
+                     //Internal media
+
+               }
+
+          }
+
+          if( resId!="" && resId!=undefined ){
+                //...To be modified: send more data in the internalplayer case(.video)
+                if(course_modules[resId].course_module_file!=undefined){
+                    reslicence=course_modules[resId].course_module_file_licence.fullname;
+                    reslicenceurl=course_modules[resId].course_module_file_licence.source;
+                    resauthor=course_modules[resId].course_module_file.author;
+                    resmimetype=course_modules[resId].course_module_file.mimetype;
+                }
+                resultstatus="success";
+          }
+          return {
+             'resUrl':resUrl,
+             'resId':resId,
+             'resauthor':resauthor,
+             'reslicence':reslicence,
+             'reslicenceurl': reslicenceurl,
+             'resmimetype':resmimetype,
+             'subresaccessedid':subresaccessedid,
+             'resmediaobject':resmediaobject,
+             'resultstatus':resultstatus
+          };
+}
+
+/*******************************************Decision Function***************************************************************/
+
+function senddatatox5gon(resUrl,resId,resauthor,reslicence,resmimetype,subresaccessedid,course_modules,course_gen_infos,course_cat_infos, resmediaobject, provider_token,user_consent, reslicenceurl, freaccess={}){
+
+     // resUrl is decided to be module_module url (to garantee the homoginity) at the moment of user_atcvity
+     // For module_type=resource material/resourceFinal url which is rendered
+     if (course_modules[resId].course_module_geninfos.modname=='resource'){
+        resUrl = course_modules[resId].course_module_file.fileurl;
+     }
+     var mdlResourceObject={
+         resurl:resUrl,
+         resmdlid:resId,
+         restitle:course_modules[resId].course_module_instance.name,
+         reslicence:reslicenceurl,
+         reslicencename: reslicence,
+         restype: course_modules[resId].course_module_geninfos.modname,
+         resmimetype:resmimetype,
+         resauthor:resauthor,
+         residincrspage:subresaccessedid,
+         resurlincrspage:resUrl+subresaccessedid,
+         resintro:course_modules[resId].course_module_instance.intro,
+         resadded:course_modules[resId].course_module_geninfos.added,
+         crs:course_gen_infos.fullname,
+         crsid:course_gen_infos.id,
+         crsurl:course_gen_infos.crsurl,
+         crssum:course_gen_infos.summary,
+         crslang:course_gen_infos.lang,
+         crsctg:course_cat_infos.name,
+         crsctgdesc:course_cat_infos.description,
+         resmd:resmediaobject.resmd,
+         resmdduration:resmediaobject.resmdduration,
+         resmdsrc:resmediaobject.resmdsrc,
+         resmdaction:resmediaobject.resmdaction,
+         resmdactionrltime:resmediaobject.resmdactionrltime,
+         resfreacs: freaccess
+     };
+
+       //All other mdl plgn: License control + UserConsent control
+       if(
+            (
+             (course_modules[resId].course_module_file==undefined)
+             ||
+             ( course_modules[resId].course_module_file!=undefined && (course_modules[resId].course_module_file.license).match(/\b(?:public|cc|cc-nd|cc-nc-nd|cc-nc|cc-nc-sa|cc-sa)\b/gi))
+            )
+            &&
+            decideAboutUserConsent(user_consent)==1
+        ){
+
+            x5activityacqrequest(provider_token, mdlResourceObject);
+
+        }
+
+        // X5actplgn: External x5endpoints are allowed to be reached inside the x5activityplgn
+        if( Object.keys(freaccess).length !== 0 ){
+            x5activityplgn_accessrequest(provider_token, mdlResourceObject);
+        }
+
+}
+
+
+function decideAboutUserConsent(user_consent){
+    var finalUserConsent=user_consent.userconsenttox5gon;
+    if(user_consent.usertype=="internal"){
+        //Moodle internal users
+        finalUserConsent=user_consent.userconsenttox5gon;
+    }else{
+        //Moodle Guest/Anonymous users --> verify 'ConsentCookie'
+        var euCookieLawConsent= getCookie('EU_COOKIE_LAW_CONSENT');
+        if(euCookieLawConsent==true || euCookieLawConsent=='true'){
+            finalUserConsent= 1;
+        }else{
+            finalUserConsent= 0;
+        }
+
+    }
+    //Test on 'ignore' flag (mainly used with some specific Moodle versions)
+    if(user_consent.ignore=='1'){
+        finalUserConsent=1;
+    }
+
+    return finalUserConsent;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////Body////////////////////////////////////////////////////////////////////////////////////
+
+require(['jquery'], function($) {
+
+       /***///Advanced Version: all accesses to different moodle modules types
+       $('.activityinstance').click(function() {
+
+          //Get href in "a tag under this class" execute it to know the real url.
+          var resUrl=$(this).find('a:first').attr('href');
+          var resId= ($(this).find('a:first').attr('href')).split("?id=")[1];
+          var reslicence="";
+          var reslicenceurl="";
+          var resauthor="";
+          var resmimetype="";
+          var subresaccessedid='#module-'+resId;
+          var resmediaobject={
+              resmd:"no",
+              resmdduration:"",
+              resmdsrc:"",
+              resmdaction:"",
+              resmdactionrltime:""
+          };
+          if(course_modules[resId].course_module_file!=undefined){
+
+              reslicence=course_modules[resId].course_module_file_licence.fullname;
+              reslicenceurl=course_modules[resId].course_module_file_licence.source;
+              resauthor=course_modules[resId].course_module_file.author;
+              resmimetype=course_modules[resId].course_module_file.mimetype;
+          }
+          senddatatox5gon(resUrl,
+                          resId,
+                          resauthor,
+                          reslicence,
+                          resmimetype,
+                          subresaccessedid,
+                          course_modules,
+                          course_gen_infos,
+                          course_cat_infos,
+                          resmediaobject,
+                          provider_token,
+                          user_consent,
+                          reslicenceurl);
+
+     });
+
+     /***///More deep: Handle access on media resource 'resources( one media module/resource can contain multi ssub-resources)'.
+     //External files media players:
+     $(".mediaplugin").on("click", function (e) {
+
+                     var clickaction="play/pause/useractive/userinactive";
+                     if( ($(this).find("div.video-js")).hasClass( "vjs-paused" )){
+                          clickaction="play";
+                     }
+                     else if( ($(this).find("div.video-js")).hasClass( "vjs-playing" )){
+                          clickaction="pause";
+                     }
+                     else if( ($(this).find("div.video-js")).hasClass( "vjs-user-active" )){
+                          clickaction="userinactive";
+                     }
+                     else if( ($(this).find("div.video-js")).hasClass( "vjs-user-inactive" )){
+                          clickaction="useractive";
+                     }
+
+                     var resUrl='';
+                     var resId='';
+                     var subresaccessedid='';
+                     var reslicence="";
+                     var reslicenceurl="";
+                     var resauthor="";
+                     var resmimetype="";
+                     var resmediaobject={
+                         resmd:"yes",
+                         resmdduration:"",
+                         resmdsrc:"",
+                         resmdaction:"",
+                         resmdactionrltime:""
+                     };
+
+                     //Decide about the type of media(type/whereintegrated)
+                     if( $(this).closest("li.activity")!=null && ($(this).closest("li.activity")).length!=0 ){
+                              ////In-coursepage-in-module
+                              resId= ($(this).closest("li.activity").attr('id')).split("-")[1];
+                              // resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                              resUrl=course_modules[resId].course_module_geninfos.modurl;
+                              subresaccessedid='#'+$(this).closest("li.activity").attr('id');
+
+                              //...To be modified: send more data in the internalplayer case(.video)
+                              if(course_modules[resId].course_module_file!=undefined){
+                                  reslicence=course_modules[resId].course_module_file_licence.fullname;
+                                  reslicenceurl=course_modules[resId].course_module_file_licence.source;
+                                  resauthor=course_modules[resId].course_module_file.author;
+                                  resmimetype=course_modules[resId].course_module_file.mimetype;
+                              }
+                              if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                    //External media
+                                    //HERE dont do anything: the appropriate treatment will follow
+                              }else{
+                                    //Internal media
+                                    //...To be modified: moreinformations about the resourse
+                                    resmediaobject={
+                                        resmd:"yes",
+                                        resmdduration:"",
+                                        resmdsrc:($(this).find("source").attr('src')),
+                                        resmdaction:clickaction,
+                                        resmdactionrltime:""
+                                    };
+                                    senddatatox5gon(resUrl,
+                                                    resId,
+                                                    resauthor,
+                                                    reslicence,
+                                                    resmimetype,
+                                                    subresaccessedid,
+                                                    course_modules,
+                                                    course_gen_infos,
+                                                    course_cat_infos,
+                                                    resmediaobject,
+                                                    provider_token,
+                                                    user_consent,
+                                                    reslicenceurl);
+
+                              }
+
+
+                     }else if( ($('body').attr('id')).match(/page-mod-.*-view/) ){
+                              ////In-modulepage
+                              resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                              resId= getUrlParamVal('id');
+                              subresaccessedid='';
+                              if(course_modules[resId].course_module_file!=undefined){
+                                  reslicence=course_modules[resId].course_module_file_licence.fullname;
+                                  reslicenceurl=course_modules[resId].course_module_file_licence.source;
+                                  resauthor=course_modules[resId].course_module_file.author;
+                                  resmimetype=course_modules[resId].course_module_file.mimetype;
+                              }
+                              if( $('body').attr('id')=="page-mod-resource-view" ){
+                                      //In-modulepage-resource
+                                      if( ($(this).closest("div.resourcecontent")).length!=0 ){
+                                            //Main-content-ofmodule
+                                            subresaccessedid='#resourcecontent';
+                                            if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                                  //External media
+                                                  //HERE dont do anything: the appropriate treatment will follow
+
+                                            }else{
+                                                  //Internal media
+                                                  resmediaobject={
+                                                      resmd:"yes",
+                                                      resmdduration:"",
+                                                      resmdsrc:($(this).find("source").attr('src')),
+                                                      resmdaction:clickaction,
+                                                      resmdactionrltime:""
+                                                  };
+                                                  //HERE dont do anything: the appropriate treatment will follow
+
+                                            }
+                                      }else if( ($(this).closest("div#resourceintro")).length!=0 ){
+                                            //Extra-content-ofmmodule
+                                            subresaccessedid='#resourceintro';
+                                            if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                                  //External media
+                                                  //HERE dont do anything: the appropriate treatment will follow
+
+                                            }else{
+                                                  //Internal media
+                                                  resmediaobject={
+                                                      resmd:"yes",
+                                                      resmdduration:"",
+                                                      resmdsrc:($(this).find("source").attr('src')),
+                                                      resmdaction:clickaction,
+                                                      resmdactionrltime:""
+                                                  };
+                                                  //...HERE dont do anything: the appropriate treatment will follow
+
+                                            }
+                                      }
+
+                              }else{
+                                      //if(  ($('body').attr('id')).match(/page-mod-(?!resource\b)\b-view/) ){
+                                      //In-modulepage-otherthanResource
+                                      if( ($(this).closest("div.resourcecontent")).length!=0 ){
+                                            //Main-content-ofmodule
+                                            subresaccessedid='#resourcecontent';
+                                            if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                                  //External media
+                                                  //HERE dont do anything: the appropriate treatment will follow
+
+                                            }else{
+                                                  //Internal media
+                                                  resmediaobject={
+                                                      resmd:"yes",
+                                                      resmdduration:"",
+                                                      resmdsrc:($(this).find("source").attr('src')),
+                                                      resmdaction:clickaction,
+                                                      resmdactionrltime:""
+                                                  };
+                                                  senddatatox5gon(resUrl,
+                                                                  resId,
+                                                                  resauthor,
+                                                                  reslicence,
+                                                                  resmimetype,
+                                                                  subresaccessedid,
+                                                                  course_modules,
+                                                                  course_gen_infos,
+                                                                  course_cat_infos,
+                                                                  resmediaobject,
+                                                                  provider_token,
+                                                                  user_consent,
+                                                                  reslicenceurl);
+                                            }
+                                       }else if( ($(this).closest("div#resourceintro")).length!=0 ){
+                                            //Extra-content-ofmmodule
+                                            subresaccessedid='#resourceintro';
+                                            if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                                  //External media
+                                                  //HERE dont do anything: the appropriate treatment will follow
+
+                                            }else{
+                                                  //Internal media
+                                                  resmediaobject={
+                                                      resmd:"yes",
+                                                      resmdduration:"",
+                                                      resmdsrc:($(this).find("source").attr('src')),
+                                                      resmdaction:clickaction,
+                                                      resmdactionrltime:""
+                                                  };
+                                                  senddatatox5gon(resUrl,
+                                                                  resId,
+                                                                  resauthor,
+                                                                  reslicence,
+                                                                  resmimetype,
+                                                                  subresaccessedid,
+                                                                  course_modules,
+                                                                  course_gen_infos,
+                                                                  course_cat_infos,
+                                                                  resmediaobject,
+                                                                  provider_token,
+                                                                  user_consent,
+                                                                  reslicenceurl);
+
+                                            }
+                                        }else{
+                                               //Another-ofmodule-structure
+                                               if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                                     //External media
+                                                     //HERE dont do anything: the appropriate treatment will follow
+
+                                               }else{
+                                                     //Internal media
+                                                     resmediaobject={
+                                                         resmd:"yes",
+                                                         resmdduration:"",
+                                                         resmdsrc:($(this).find("source").attr('src')),
+                                                         resmdaction:clickaction,
+                                                         resmdactionrltime:""
+                                                     };
+                                                     senddatatox5gon(resUrl,
+                                                                     resId,
+                                                                     resauthor,
+                                                                     reslicence,
+                                                                     resmimetype,
+                                                                     subresaccessedid,
+                                                                     course_modules,
+                                                                     course_gen_infos,
+                                                                     course_cat_infos,
+                                                                     resmediaobject,
+                                                                     provider_token,
+                                                                     user_consent,
+                                                                     reslicenceurl);
+
+                                               }
+                                        }
+
+
+
+                              }
+
+                     }
+                     else{
+                          //In-coursepage-out-module
+                          //...HERE dont do anything: informations about the resourse still in research
+                          if( ($(this).find("iframe.vjs-tech")).length!=0 ){
+                                //External media
+                          }else{
+                                //Internal media
+
+                          }
+
+                     }
+
+
+           });
+
+           //Local files playing Case: IN-ResourceModule-page
+           //For video resources: detect actions with relative timestamp
+           $("video").on("pause", function (e) {
+               if( $('body').attr('id')=="page-mod-resource-view"){
+
+                     var resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                     var resId= getUrlParamVal('id');
+                     var subresaccessedid='';
+                     var reslicence=course_modules[resId].course_module_file_licence.fullname;
+                     var reslicenceurl=course_modules[resId].course_module_file_licence.source;
+                     var resauthor=course_modules[resId].course_module_file.author;
+                     var resmimetype=course_modules[resId].course_module_file.mimetype;
+                     var resmediaobject={
+                         resmd:'yes',
+                         resmdduration:e.target.duration,
+                         resmdsrc:e.target.currentSrc,
+                         resmdaction:'pause',
+                         resmdactionrltime:e.target.currentTime
+                     };
+                     if( (e.target.currentSrc).indexOf("intro")>-1 ){
+                          subresaccessedid='#resourceintro';
+                     }
+                     senddatatox5gon(resUrl,
+                                     resId,
+                                     resauthor,
+                                     reslicence,
+                                     resmimetype,
+                                     subresaccessedid,
+                                     course_modules,
+                                     course_gen_infos,
+                                     course_cat_infos,
+                                     resmediaobject,
+                                     provider_token,
+                                     user_consent,
+                                     reslicenceurl);
+
+                }
+
+           });
+           $("video").on("play", function (e) {
+
+                if( $('body').attr('id')=="page-mod-resource-view"){
+
+                       var resUrl=document.location.href.match(/(^[^#]*)/)[0];
+                       var resId= getUrlParamVal('id');
+                       var subresaccessedid='';
+                       var reslicence=course_modules[resId].course_module_file_licence.fullname;
+                       var reslicenceurl=course_modules[resId].course_module_file_licence.source;
+                       var resauthor=course_modules[resId].course_module_file.author;
+                       var resmimetype=course_modules[resId].course_module_file.mimetype;
+                       var resmediaobject={
+                           resmd:'yes',
+                           resmdduration:e.target.duration,
+                           resmdsrc:e.target.currentSrc,
+                           resmdaction:'play',
+                           resmdactionrltime:e.target.currentTime
+                       };
+                       if( (e.target.currentSrc).indexOf("intro")>-1 ){
+                            subresaccessedid='#resourceintro';
+                       }
+                       senddatatox5gon(resUrl,
+                                       resId,
+                                       resauthor,
+                                       reslicence,
+                                       resmimetype,
+                                       subresaccessedid,
+                                       course_modules,
+                                       course_gen_infos,
+                                       course_cat_infos,
+                                       resmediaobject,
+                                       provider_token,
+                                       user_consent,
+                                       reslicenceurl);
+
+                }
+           });
+
+           //External players: youtube cases
+           window.onYouTubeIframeAPIReady = function() {
+
+                   for (var key in ytEventsEventsListeners) {
+
+                         if( ytEventsEventsListeners[key][1] != "message" ){
+
+                             var player = YT.get(ytEventsEventsListeners[key][0].id);
+                             //subscribe to the needed events
+                             player.addEventListener("onStateChange", onStateChange);
+
+                         }
+                   }
+
+           }
+
+});
+{{/js}}
